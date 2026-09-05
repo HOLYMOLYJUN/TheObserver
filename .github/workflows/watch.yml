@@ -29,7 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # seen.json 을 커밋해 되돌려보내야 하므로 브랜치를 명시하고 전체 히스토리를 받는다.
+      # shallow clone 에서는 이후 pull --rebase 가 실패할 수 있다.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:

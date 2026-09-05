@@ -4,6 +4,11 @@ name: 회사 식별자 수집 (수동)
 # 결과는 아티팩트로 올라가며, 이를 보고 data/companies.json 을 확정한다.
 on:
   workflow_dispatch:
+    inputs:
+      company_id:
+        description: "특정 회사만 조회 (companies.json 의 id). 비우면 전체"
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -24,6 +29,8 @@ jobs:
       - run: npx playwright install --with-deps --only-shell chromium
 
       - name: Resolve company identifiers
+        env:
+          COMPANY_ID: ${{ inputs.company_id }}
         run: npm run resolve
 
       - name: Job summary

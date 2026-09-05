@@ -151,7 +151,13 @@ function renderSummary(reports: CompanyReport[]): string {
 
 async function main(): Promise<void> {
   await mkdir(`${OUT}/html`, { recursive: true });
-  const companies = await loadCompanies();
+  const all = await loadCompanies();
+  const only = process.env.COMPANY_ID?.trim();
+  const companies = only ? all.filter((c) => c.id === only) : all;
+  if (companies.length === 0) {
+    throw new Error(`COMPANY_ID="${only}" 에 해당하는 기업이 없습니다. 유효한 id: ${all.map((c) => c.id).join(", ")}`);
+  }
+  if (only) log.info(`${companies[0]!.name} 한 곳만 조회합니다.`);
   const reports: CompanyReport[] = [];
 
   for (const company of companies) {

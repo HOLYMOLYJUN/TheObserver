@@ -12,7 +12,19 @@ import type { Posting } from "./types.ts";
 async function run(): Promise<void> {
   assertConfig();
 
-  const companies = await loadCompanies();
+  const allCompanies = await loadCompanies();
+  const companies = config.onlyCompany
+    ? allCompanies.filter((c) => c.id === config.onlyCompany)
+    : allCompanies;
+  if (companies.length === 0) {
+    throw new Error(
+      `ONLY_COMPANY="${config.onlyCompany}" 에 해당하는 기업이 없습니다. ` +
+        `유효한 id: ${allCompanies.map((c) => c.id).join(", ")}`,
+    );
+  }
+  if (config.onlyCompany) {
+    log.warn(`탐색 모드 — ${companies[0]!.name} 한 곳만 조회합니다. 상태는 저장하지 않습니다.`);
+  }
   const index = buildIndex(companies);
   const store = await Store.load();
   log.info(`감시 기업 ${companies.length}곳 · 기록된 공고 ${store.size}건`);
@@ -108,7 +120,13 @@ async function run(): Promise<void> {
     }
   }
 
-  /* 7. 상태 저장 */
+  /* 7. 상태 저장 — 탐색 모드는 일부만 조회하므로 저장하지 않는다.
+   *    한 곳만 본 결과로 부트스트랩을 끝내면 다음 실행에서 나머지 16곳이 전부 신규로 터진다. */
+  if (config.onlyCompany) {
+    log.info("탐색 모드이므로 상태를 저장하지 않습니다.");
+    return;
+  }
+
   const pruned = store.prune();
   if (pruned > 0) log.info(`오래된 기록 ${pruned}건 정리`);
   await store.save();

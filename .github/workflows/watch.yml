@@ -15,6 +15,10 @@ on:
         description: "개발 직무 필터 끄기 (모든 공고 통과)"
         type: boolean
         default: false
+      only_company:
+        description: "탐색용 — 이 회사 하나만 조회 (예: freegrow). 상태 저장 안 함"
+        type: string
+        required: false
 
 # 동시 실행 방지 — seen.json 커밋 충돌을 막는다
 concurrency:
@@ -53,12 +57,13 @@ jobs:
           SARAMIN_ACCESS_KEY: ${{ secrets.SARAMIN_ACCESS_KEY }}
           DRY_RUN: ${{ inputs.dry_run }}
           NO_DEV_FILTER: ${{ inputs.no_dev_filter }}
+          ONLY_COMPANY: ${{ inputs.only_company }}
         run: npm run watch
 
       # seen.json 커밋은 중복 알림 방지인 동시에,
       # 60일 무활동으로 스케줄이 꺼지는 걸 막는 안전장치이기도 하다.
       - name: Commit state
-        if: always() && inputs.dry_run != true
+        if: always() && inputs.dry_run != true && inputs.only_company == ''
         run: |
           if git diff --quiet -- data/seen.json; then
             echo "변경 없음"

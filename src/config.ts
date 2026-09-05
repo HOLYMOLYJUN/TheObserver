@@ -28,6 +28,11 @@ export const config = {
 
   /** true면 Slack으로 보내지 않고 콘솔에만 출력 */
   dryRun: bool("DRY_RUN", false),
+  /**
+   * 지정하면 이 회사 하나만 조회한다 (companies.json 의 id).
+   * 차단이 풀렸는지 확인할 때 17곳을 다 두드려 차단을 굳히지 않기 위한 안전핀.
+   */
+  onlyCompany: (process.env.ONLY_COMPANY ?? "").trim(),
   /** true면 개발 직무 필터를 끄고 모든 공고를 통과시킴 */
   noDevFilter: bool("NO_DEV_FILTER", false),
   /** 1회 실행당 개별 카드 발송 상한. 초과분은 요약 한 줄로 */

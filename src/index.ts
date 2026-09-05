@@ -142,7 +142,16 @@ async function run(): Promise<void> {
 
 try {
   await run();
-  log.info("완료");
+  // DRY_RUN 여부가 로그 한가운데 묻혀 "왜 Slack 이 안 오지" 로 이어졌다.
+  // 실행 결과의 마지막 줄에서 분명히 알 수 있어야 한다.
+  if (config.dryRun) {
+    log.warn(
+      "완료 — DRY_RUN 이므로 Slack 으로 아무것도 보내지 않았습니다. " +
+        '실제로 보내려면 "Slack 발송 없이 콘솔 출력만" 체크를 해제하고 다시 실행하세요.',
+    );
+  } else {
+    log.info("완료 — Slack 발송까지 마쳤습니다.");
+  }
 } catch (err) {
   log.error("실행 실패:", err);
   await sendError(err);

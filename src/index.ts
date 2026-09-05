@@ -31,6 +31,8 @@ async function run(): Promise<void> {
   const raw = results.flatMap((r) => r.postings);
   log.info(`총 ${raw.length}건 수집`);
 
+  const companyNameOf = (id?: string) => (id ? index.byId.get(id)?.name ?? "?" : "?");
+
   /* 2. 감시 대상 기업 매칭 */
   const matched: Posting[] = [];
   for (const p of raw) {
@@ -56,12 +58,24 @@ async function run(): Promise<void> {
   const filteredOut = regionScoped.length - relevant.length;
   log.info(`개발 직무 필터 통과: ${relevant.length}건 (제외 ${filteredOut}건)`);
 
+  // 검증 실행에서는 필터가 무엇을 통과시키고 무엇을 버렸는지 눈으로 봐야
+  // 키워드를 조정할 수 있다. 운영 실행에서는 로그를 어지럽히므로 생략한다.
+  if (config.dryRun) {
+    const label = (p: Posting) =>
+      `    [${companyNameOf(p.companyId)}] ${p.title}` +
+      `${p.location ? ` · ${p.location}` : ""}${p.experience ? ` · ${p.experience}` : ""}`;
+    const excluded = regionScoped.filter((p) => !relevant.includes(p));
+    log.info(`통과한 공고 ${relevant.length}건:\n${relevant.map(label).join("\n")}`);
+    if (excluded.length > 0) {
+      log.info(`제외된 공고 ${excluded.length}건:\n${excluded.map(label).join("\n")}`);
+    }
+  }
+
   /* 5. 중복 제거 */
   const fresh = store.filterNew(relevant);
   log.info(`신규 공고: ${fresh.length}건`);
 
   /* 6. 발송 */
-  const companyName = (id?: string) => (id ? index.byId.get(id)?.name ?? "" : "");
 
   // 수집이 통째로 실패한 회차에 부트스트랩을 완료 처리하면,
   // 다음 성공 회차에서 기존 공고 전부가 "신규"로 터진다. 그래서 수집 성공을 전제로 한다.
@@ -78,7 +92,7 @@ async function run(): Promise<void> {
   } else if (fresh.length > 0) {
     const regionOf = (id?: string) => (id ? index.byId.get(id)?.region ?? "" : "");
     const ordered = busanFirst(fresh, regionOf);
-    await sendPostings(ordered, companyName, warnings);
+    await sendPostings(ordered, companyNameOf, warnings);
     // 발송 성공 후에 기록한다 — 실패 시 다음 실행에서 재시도되도록
     store.record(ordered.slice(0, config.maxCards));
     log.info(`Slack 발송 완료: ${Math.min(fresh.length, config.maxCards)}건`);

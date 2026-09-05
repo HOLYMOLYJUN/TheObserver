@@ -46,6 +46,8 @@ interface CompanyReport {
     ownedJobs: number;
     /** 검색 결과에 섞여 나온 무관한 회사 (광고·유사검색 확인용) */
     otherCorps: string[];
+    /** 확정 코드의 회사 채용 페이지를 열어본 결과 */
+    companyPages?: string[];
   };
 }
 
@@ -98,6 +100,35 @@ async function probeSaramin(company: Company): Promise<CompanyReport["saramin"]>
 }
 
 /* ── 잡코리아 (브라우저 필수) ──────────────────────────────────── */
+
+/**
+ * 확정된 회사 코드로 채용 페이지를 직접 열어본다.
+ * 감시 실행에서 코드가 있는 7곳이 전부 0건이 나왔기 때문에,
+ * 이 페이지가 실제로 어떤 구조인지 확인해야 한다.
+ */
+async function probeJobkoreaCompanyPage(page: Page, company: Company): Promise<string[]> {
+  const notes: string[] = [];
+  for (const code of company.jobkoreaCodes) {
+    const url = `https://www.jobkorea.co.kr/company/${code}/Recruit`;
+    try {
+      await page.goto(url, { waitUntil: "networkidle", timeout: 45_000 });
+      await page.waitForTimeout(2_000);
+      const html = await page.content();
+      await writeFile(`${OUT}/html/jobkorea-${company.id}-company-${code}.html`, html, "utf8");
+
+      const $ = cheerio.load(html);
+      const giRead = $("a[href*='GI_Read']").length;
+      const anyRecruit = $("a[href*='Recruit']").length;
+      notes.push(
+        `code=${code} url=${page.url()} title="${$("title").text().trim().slice(0, 60)}" ` +
+          `GI_Read=${giRead} Recruit링크=${anyRecruit} 본문=${$("body").text().replace(/\s+/g, " ").trim().length}자`,
+      );
+    } catch (err) {
+      notes.push(`code=${code} → ${(err as Error).message}`);
+    }
+  }
+  return notes;
+}
 
 async function probeJobkorea(page: Page, company: Company): Promise<CompanyReport["jobkorea"]> {
   const target = normalizeCompany(company.name);
@@ -252,12 +283,17 @@ async function main(): Promise<void> {
 
     for (const company of companies) {
       log.step(`조회: ${company.name}`);
+      const jobkorea = await probeJobkorea(page, company);
+      if (company.jobkoreaCodes.length > 0) {
+        jobkorea.companyPages = await probeJobkoreaCompanyPage(page, company);
+        for (const n of jobkorea.companyPages) log.info(`  회사페이지: ${n}`);
+      }
       reports.push({
         id: company.id,
         name: company.name,
         region: company.region,
         saramin: await probeSaramin(company),
-        jobkorea: await probeJobkorea(page, company),
+        jobkorea,
       });
     }
   } finally {

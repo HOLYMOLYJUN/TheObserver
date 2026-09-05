@@ -1,0 +1,24 @@
+{
+  "name": "the-observer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "관심 기업의 개발 채용공고를 사람인·잡코리아에서 감시해 Slack으로 알려주는 봇",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "watch": "tsx src/index.ts",
+    "watch:dry": "DRY_RUN=true tsx src/index.ts",
+    "resolve": "tsx scripts/resolve-companies.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "playwright": "^1.49.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

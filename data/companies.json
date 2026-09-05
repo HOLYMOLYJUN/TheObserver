@@ -1,0 +1,24 @@
+{
+  "$comment": "감시 대상 기업. saraminName/jobkoreaCode 는 resolve-companies 워크플로 실행 후 채워짐.",
+  "version": 1,
+  "companies": [
+    { "id": "iljugns",      "name": "일주지앤에스(주)",       "aliases": ["일주지앤에스", "일주G&S"],                       "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "busanilbo",    "name": "부산일보(주)",           "aliases": ["부산일보", "부산일보사"],                        "industry": "미디어/디자인", "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "swinnus",      "name": "(주)에스위너스",         "aliases": ["에스위너스", "Swinnus", "SWINNUS"],              "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "hssoft",       "name": "에이치에스소프트(주)",   "aliases": ["에이치에스소프트", "HS소프트", "HSS", "HSSOFT"], "industry": "IT/웹/통신",   "region": "인천", "saraminName": null, "jobkoreaCode": null },
+    { "id": "kamco",        "name": "한국자산관리공사",       "aliases": ["캠코", "KAMCO", "자산관리공사"],                 "industry": "은행/금융업",  "region": "서울", "saraminName": null, "jobkoreaCode": null },
+    { "id": "nablesoft",    "name": "네이블소프트(주)",       "aliases": ["네이블소프트", "Nable", "네이블"],               "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "elecocean",    "name": "(주)일렉오션",           "aliases": ["일렉오션", "ElecOcean"],                         "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "henkelkorea",  "name": "헨켈코리아(유)",         "aliases": ["헨켈코리아", "헨켈", "Henkel", "Henkel Korea"],  "industry": "제조/화학",    "region": "충남", "saraminName": null, "jobkoreaCode": null },
+    { "id": "lab021",       "name": "(주)랩오투원",           "aliases": ["랩오투원", "LAB02", "LAB021", "랩투원"],         "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "freegrow",     "name": "(주)프리그로우",         "aliases": ["프리그로우", "freegrow", "Free Grow"],           "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "cnet",         "name": "씨넷(주)",               "aliases": ["씨넷", "CNET", "C-NET"],                         "industry": "제조/화학",    "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "wartsilakorea","name": "바르질라코리아(주)",     "aliases": ["바르질라코리아", "바르질라", "Wartsila", "WÄRTSILÄ"], "industry": "서비스업", "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "deliveredkr",  "name": "(주)딜리버드코리아",     "aliases": ["딜리버드코리아", "딜리버드", "Delivered Korea"], "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "douzone_bs",   "name": "(주)더존비즈온부산지사", "aliases": ["더존비즈온부산지사", "더존비즈온", "더존"],      "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "bnksystem",    "name": "(주)비엔케이시스템",     "aliases": ["비엔케이시스템", "BNK시스템", "BNK System"],     "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "toz",          "name": "(주)토즈",               "aliases": ["토즈", "TOZ"],                                   "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "primoem",      "name": "(주)프리모엠",           "aliases": ["프리모엠", "PrimoM", "프리모"],                  "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
+    { "id": "iotsolution",  "name": "(주)아이오티솔루션",     "aliases": ["아이오티솔루션", "IoT솔루션", "IoT Solution"],   "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null }
+  ]
+}

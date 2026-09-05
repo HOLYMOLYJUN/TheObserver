@@ -257,8 +257,15 @@
       ],
       "industry": "IT/웹/통신",
       "region": "부산",
-      "saramin": [],
-      "jobkoreaCodes": []
+      "saramin": [
+        {
+          "csn": "bmJNSnpSYmdjUCs3bGoyQ1ZSNUZYdz09",
+          "name": "(주)더존비즈온",
+          "address": "강원 춘천시 남산면 버들1길 130"
+        }
+      ],
+      "jobkoreaCodes": [],
+      "onlyRegion": "부산"
     },
     {
       "id": "bnksystem",

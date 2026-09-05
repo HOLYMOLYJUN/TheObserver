@@ -97,3 +97,15 @@ test("근무지 표기가 없으면 회사 소재지로 판단한다", () => {
   const out = busanFirst([p("a", "a"), p("b", "b")], (id) => regions[id!] ?? "");
   assert.equal(out[0]!.companyRaw, "b");
 });
+
+test("지역 한정 회사는 해당 지역 공고만 통과시킨다", () => {
+  // 더존비즈온처럼 본사가 전국 공고를 내지만 특정 지역만 볼 때
+  const only = "부산";
+  const pass = (location?: string) => !location || location.includes(only);
+
+  assert.equal(pass("부산 해운대구"), true);
+  assert.equal(pass("서울 강남구"), false);
+  assert.equal(pass("강원 춘천시"), false);
+  // 근무지 표기가 없으면 놓치는 것보다 통과시키는 쪽이 낫다
+  assert.equal(pass(undefined), true);
+});

@@ -36,6 +36,11 @@ export const config = {
   retentionDays: int("RETENTION_DAYS", 90),
   /** 소스 요청 간 최소 간격 (ms). 상대 서버 배려 겸 차단 회피 */
   requestDelayMs: int("REQUEST_DELAY_MS", 1500),
+  /**
+   * 잡코리아 회사코드가 없는 회사를 상호 검색으로 조회할지.
+   * 잡코리아 검색은 전문 유사 검색이라 무관한 결과가 대량으로 섞여 기본은 끈다.
+   */
+  jobkoreaSearchFallback: bool("JOBKOREA_SEARCH_FALLBACK", false),
   /** HTTP 실패 시 Playwright 폴백 허용 여부 */
   allowBrowserFallback: bool("ALLOW_BROWSER_FALLBACK", true),
   /** 하트비트를 보낼 요일 (0=일 … 1=월). -1이면 비활성 */

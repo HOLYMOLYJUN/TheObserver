@@ -17,10 +17,12 @@ async function run(): Promise<void> {
   const store = await Store.load();
   log.info(`감시 기업 ${companies.length}곳 · 기록된 공고 ${store.size}건`);
 
-  const unresolved = companies.filter((c) => c.jobkoreaCodes.length === 0).length;
-  if (unresolved > 0) {
-    log.warn(`잡코리아 회사코드 미확정 ${unresolved}곳 — 검색 기반으로 조회합니다. ` +
-      `(resolve-companies 워크플로를 실행하면 정확도가 올라갑니다)`);
+  const noJobkorea = companies.filter((c) => c.jobkoreaCodes.length === 0);
+  if (noJobkorea.length > 0) {
+    log.warn(
+      `잡코리아 회사코드 미확정 ${noJobkorea.length}곳은 사람인으로만 감시합니다: ` +
+        `${noJobkorea.map((c) => c.name).join(", ")}`,
+    );
   }
 
   /* 1. 수집 — 소스별 독립 실행 */
@@ -37,18 +39,28 @@ async function run(): Promise<void> {
   }
   log.info(`대상 기업 매칭: ${matched.length}건`);
 
-  /* 3. 개발 직무 필터 */
+  /* 3. 회사별 지역 한정 필터 (onlyRegion 이 지정된 회사만) */
+  const regionScoped = matched.filter((p) => {
+    const only = index.byId.get(p.companyId!)?.onlyRegion;
+    if (!only) return true;
+    // 근무지 표기가 없는 공고는 판단할 수 없으므로 통과시킨다 (놓치는 것보다 낫다)
+    return !p.location || p.location.includes(only);
+  });
+  const regionDropped = matched.length - regionScoped.length;
+  if (regionDropped > 0) log.info(`지역 한정으로 제외: ${regionDropped}건`);
+
+  /* 4. 개발 직무 필터 */
   const relevant = config.noDevFilter
-    ? matched
-    : matched.filter((p) => isDevRole(p.title, p.employmentType ?? ""));
-  const filteredOut = matched.length - relevant.length;
+    ? regionScoped
+    : regionScoped.filter((p) => isDevRole(p.title, p.employmentType ?? ""));
+  const filteredOut = regionScoped.length - relevant.length;
   log.info(`개발 직무 필터 통과: ${relevant.length}건 (제외 ${filteredOut}건)`);
 
-  /* 4. 중복 제거 */
+  /* 5. 중복 제거 */
   const fresh = store.filterNew(relevant);
   log.info(`신규 공고: ${fresh.length}건`);
 
-  /* 5. 발송 */
+  /* 6. 발송 */
   const companyName = (id?: string) => (id ? index.byId.get(id)?.name ?? "" : "");
 
   // 수집이 통째로 실패한 회차에 부트스트랩을 완료 처리하면,
@@ -82,12 +94,12 @@ async function run(): Promise<void> {
     }
   }
 
-  /* 6. 상태 저장 */
+  /* 7. 상태 저장 */
   const pruned = store.prune();
   if (pruned > 0) log.info(`오래된 기록 ${pruned}건 정리`);
   await store.save();
 
-  /* 7. 수집이 전부 실패했으면 워크플로를 실패로 표시한다 */
+  /* 8. 수집이 전부 실패했으면 워크플로를 실패로 표시한다 */
   if (results.every((r) => !r.ok || r.postings.length === 0)) {
     throw new Error(
       `모든 소스에서 공고를 가져오지 못했습니다. 차단 또는 셀렉터 변경 의심.\n${warnings.join("\n")}`,

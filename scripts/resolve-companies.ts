@@ -38,7 +38,15 @@ interface CompanyReport {
   name: string;
   region: string;
   saramin: { ok: boolean; error?: string; candidates: Candidate[] };
-  jobkorea: { ok: boolean; error?: string; candidates: Candidate[]; jobLinks: number };
+  jobkorea: {
+    ok: boolean;
+    error?: string;
+    candidates: Candidate[];
+    /** 검색 결과 중 상호가 실제로 일치한 공고 수 */
+    ownedJobs: number;
+    /** 검색 결과에 섞여 나온 무관한 회사 (광고·유사검색 확인용) */
+    otherCorps: string[];
+  };
 }
 
 /* ── 사람인 (HTTP) ─────────────────────────────────────────────── */
@@ -95,8 +103,15 @@ async function probeJobkorea(page: Page, company: Company): Promise<CompanyRepor
   const target = normalizeCompany(company.name);
   const errors: string[] = [];
 
-  for (const keyword of [company.name, ...company.aliases]) {
-    const url = `https://www.jobkorea.co.kr/Search/?stext=${encodeURIComponent(keyword)}&tabType=corp`;
+  // 기업 탭(회사 코드) 과 공고 탭(실제 공고 보유 여부) 을 모두 확인한다
+  const keywords = [company.name, ...company.aliases];
+  const targets = keywords.flatMap((k) => [
+    { keyword: k, tab: "corp" },
+    { keyword: k, tab: "recruit" },
+  ]);
+
+  for (const { keyword, tab } of targets) {
+    const url = `https://www.jobkorea.co.kr/Search/?stext=${encodeURIComponent(keyword)}&tabType=${tab}`;
     try {
       await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45_000 });
       // 기업 카드 또는 공고 링크 중 하나라도 뜰 때까지 기다린다
@@ -104,10 +119,29 @@ async function probeJobkorea(page: Page, company: Company): Promise<CompanyRepor
         .waitForSelector("a[href*='Co_Read'], a[href*='GI_Read']", { timeout: 12_000 })
         .catch(() => {});
       const html = await page.content();
-      await writeFile(`${OUT}/html/jobkorea-${company.id}.browser.html`, html, "utf8");
+      await writeFile(`${OUT}/html/jobkorea-${company.id}.${tab}.html`, html, "utf8");
 
       const $ = cheerio.load(html);
-      const jobLinks = new Set($("a[href*='GI_Read']").map((_, a) => $(a).attr("href")).get()).size;
+
+      /*
+       * 잡코리아 검색은 전문 유사 검색이다. "(주)프리모엠" 검색에 두산·판타지오 공고가
+       * 섞여 나오고 "(주)아이오티솔루션" 은 322건이 잡힌다. 그래서 링크 개수는 의미가
+       * 없고, 공고 카드에 적힌 상호가 대상 회사와 일치하는지 세어야 한다.
+       */
+      let ownedJobs = 0;
+      const otherCorps = new Set<string>();
+      const countedJobs = new Set<string>();
+      $("a[href*='GI_Read']").each((_, a) => {
+        const id = /GI_Read\/(\d+)/.exec($(a).attr("href") ?? "")?.[1];
+        if (!id || countedJobs.has(id)) return;
+        countedJobs.add(id);
+        const $card = $(a).closest("li, article, div[class*='flex-col']").first();
+        const corp = $card.find("a[href*='Co_Read'], a[href*='/company/']").first().text().trim();
+        const n = normalizeCompany(corp);
+        if (n && (n.includes(target) || target.includes(n))) ownedJobs++;
+        else if (corp) otherCorps.add(corp);
+      });
+
       const cands: Candidate[] = [];
       const seen = new Set<string>();
 
@@ -123,15 +157,20 @@ async function probeJobkorea(page: Page, company: Company): Promise<CompanyRepor
         cands.push({ name, code, exactMatch: n === target, via: keyword });
       });
 
-      if (cands.length > 0 || jobLinks > 0) {
-        return { ok: true, candidates: cands.slice(0, 20), jobLinks };
+      if (cands.length > 0 || ownedJobs > 0) {
+        return {
+          ok: true,
+          candidates: cands.slice(0, 20),
+          ownedJobs,
+          otherCorps: [...otherCorps].slice(0, 5),
+        };
       }
-      errors.push(`"${keyword}" → 0건`);
+      errors.push(`"${keyword}" → 본인 공고 0건 (무관 결과 ${countedJobs.size}건)`);
     } catch (err) {
       errors.push(`"${keyword}" → ${(err as Error).message}`);
     }
   }
-  return { ok: errors.length === 0, error: errors.join(" / "), candidates: [], jobLinks: 0 };
+  return { ok: errors.length === 0, error: errors.join(" / "), candidates: [], ownedJobs: 0, otherCorps: [] };
 }
 
 /* ── 요약 ──────────────────────────────────────────────────────── */
@@ -150,14 +189,16 @@ function renderSummary(reports: CompanyReport[]): string {
       : `❌ ${r.saramin.error ?? "후보 없음"}`;
     const jTxt = j
       ? `${j.exactMatch ? "★" : "?"} ${j.name} (${j.code})`
-      : r.jobkorea.jobLinks > 0
-        ? `기업정보 없음 · 공고링크 ${r.jobkorea.jobLinks}개`
+      : r.jobkorea.ownedJobs > 0
+        ? `기업코드 없음 · 본인 공고 ${r.jobkorea.ownedJobs}건`
         : `❌ ${r.jobkorea.error ?? "후보 없음"}`;
     return `| ${r.name} | ${sTxt} | ${jTxt} |`;
   });
 
   const noSaramin = reports.filter((r) => r.saramin.candidates.length === 0);
-  const noJobkorea = reports.filter((r) => r.jobkorea.candidates.length === 0 && r.jobkorea.jobLinks === 0);
+  const noJobkorea = reports.filter(
+    (r) => r.jobkorea.candidates.length === 0 && r.jobkorea.ownedJobs === 0,
+  );
 
   return [
     "# 회사 식별자 수집 결과",

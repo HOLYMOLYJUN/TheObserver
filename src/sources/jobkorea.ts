@@ -81,6 +81,17 @@ async function renderedHtml(page: Page, url: string): Promise<string> {
 }
 
 async function collectCompany(page: Page, company: Company): Promise<Posting[]> {
+  /*
+   * 회사 코드가 없으면 상호 검색으로 폴백할 수 있으나, 실측 결과 잡코리아 검색은
+   * 전문(全文) 유사 검색이라 무관한 결과를 대량으로 돌려준다.
+   * "(주)프리모엠" 검색에 두산·판타지오·LG생활건강 공고가 나오고,
+   * "(주)아이오티솔루션" 은 총 322건이 잡힌다. 회사명 대조로 걸러내면 결국 0건이므로
+   * 브라우저 시간만 낭비한다. 기본은 건너뛰고, 필요하면 명시적으로 켠다.
+   */
+  if (company.jobkoreaCodes.length === 0 && !config.jobkoreaSearchFallback) {
+    return [];
+  }
+
   const urls = company.jobkoreaCodes.length > 0
     ? company.jobkoreaCodes.map(companyRecruitUrl)
     : [searchUrl(company.name)];
@@ -145,11 +156,22 @@ export async function collectJobkorea(
       return ["image", "font", "media"].includes(type) ? route.abort() : route.continue();
     });
 
+    const skipped: string[] = [];
     for (const company of companies) {
+      if (company.jobkoreaCodes.length === 0 && !config.jobkoreaSearchFallback) {
+        skipped.push(company.name);
+        continue;
+      }
       const found = await collectCompany(page, company);
       log.info(`  잡코리아 ${company.name}: ${found.length}건`);
       all.push(...found);
       await page.waitForTimeout(config.requestDelayMs);
+    }
+    if (skipped.length > 0) {
+      log.warn(
+        `잡코리아 회사코드 미확정 ${skipped.length}곳은 건너뛰었습니다 (사람인으로만 감시): ` +
+          skipped.join(", "),
+      );
     }
   } finally {
     await browser?.close();

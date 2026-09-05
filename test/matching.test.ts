@@ -109,3 +109,15 @@ test("지역 한정 회사는 해당 지역 공고만 통과시킨다", () => {
   // 근무지 표기가 없으면 놓치는 것보다 통과시키는 쪽이 낫다
   assert.equal(pass(undefined), true);
 });
+
+test("디자인 직군은 제외하되 웹 퍼블리셔는 통과시킨다", () => {
+  // "프로덕트" 키워드 때문에 디자이너 공고가 새어 들어왔던 사례
+  assert.equal(isDevRole("[딜리버드코리아] 플랫폼그룹 프로덕트디자이너 모집"), false);
+  assert.equal(isDevRole("UI/UX디자이너 채용"), false);
+  assert.equal(isDevRole("그래픽디자이너 신입"), false);
+
+  // 디자이너를 통째로 막으면 이런 공고를 놓친다
+  assert.equal(isDevRole("웹 퍼블리셔 모집"), true);
+  assert.equal(isDevRole("웹디자이너/퍼블리셔"), true);
+  assert.equal(isDevRole("프로덕트 매니저 (PM)"), true);
+});

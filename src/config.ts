@@ -11,9 +11,20 @@ function int(name: string, fallback: number): number {
   return Number.isFinite(v) && v > 0 ? v : fallback;
 }
 
+/**
+ * 발급 전 자리표시자("1", "TODO", "changeme"...)를 실제 키로 오인하면
+ * 잘못된 키로 회사 수만큼 API를 두드린 뒤에야 폴백한다. 그냥 없는 것으로 본다.
+ * 사람인 access-key 는 충분히 긴 문자열이다.
+ */
+function accessKey(raw: string): string {
+  const v = raw.trim();
+  if (v.length < 16 || /^(1|0|x+|test|todo|changeme|placeholder|dummy|none)$/i.test(v)) return "";
+  return v;
+}
+
 export const config = {
   slackWebhookUrl: process.env.SLACK_WEBHOOK_URL ?? "",
-  saraminAccessKey: process.env.SARAMIN_ACCESS_KEY ?? "",
+  saraminAccessKey: accessKey(process.env.SARAMIN_ACCESS_KEY ?? ""),
 
   /** true면 Slack으로 보내지 않고 콘솔에만 출력 */
   dryRun: bool("DRY_RUN", false),
@@ -36,6 +47,12 @@ export function assertConfig(): void {
     throw new Error("SLACK_WEBHOOK_URL 이 설정되지 않았습니다. (또는 DRY_RUN=true 로 실행)");
   }
   if (!config.saraminAccessKey) {
-    log.warn("SARAMIN_ACCESS_KEY 없음 — 사람인은 공식 API 대신 웹 파싱으로 동작합니다.");
+    const raw = (process.env.SARAMIN_ACCESS_KEY ?? "").trim();
+    log.warn(
+      raw
+        ? `SARAMIN_ACCESS_KEY 가 자리표시자로 보입니다(길이 ${raw.length}) — 웹 파싱으로 동작합니다. ` +
+          "발급 후 실제 키로 교체하면 코드 변경 없이 API 경로로 전환됩니다."
+        : "SARAMIN_ACCESS_KEY 없음 — 사람인은 공식 API 대신 웹 파싱으로 동작합니다.",
+    );
   }
 }

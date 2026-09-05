@@ -1,24 +1,342 @@
 {
-  "$comment": "감시 대상 기업. saraminName/jobkoreaCode 는 resolve-companies 워크플로 실행 후 채워짐.",
-  "version": 1,
+  "version": 2,
   "companies": [
-    { "id": "iljugns",      "name": "일주지앤에스(주)",       "aliases": ["일주지앤에스", "일주G&S"],                       "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "busanilbo",    "name": "부산일보(주)",           "aliases": ["부산일보", "부산일보사"],                        "industry": "미디어/디자인", "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "swinnus",      "name": "(주)에스위너스",         "aliases": ["에스위너스", "Swinnus", "SWINNUS"],              "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "hssoft",       "name": "에이치에스소프트(주)",   "aliases": ["에이치에스소프트", "HS소프트", "HSS", "HSSOFT"], "industry": "IT/웹/통신",   "region": "인천", "saraminName": null, "jobkoreaCode": null },
-    { "id": "kamco",        "name": "한국자산관리공사",       "aliases": ["캠코", "KAMCO", "자산관리공사"],                 "industry": "은행/금융업",  "region": "서울", "saraminName": null, "jobkoreaCode": null },
-    { "id": "nablesoft",    "name": "네이블소프트(주)",       "aliases": ["네이블소프트", "Nable", "네이블"],               "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "elecocean",    "name": "(주)일렉오션",           "aliases": ["일렉오션", "ElecOcean"],                         "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "henkelkorea",  "name": "헨켈코리아(유)",         "aliases": ["헨켈코리아", "헨켈", "Henkel", "Henkel Korea"],  "industry": "제조/화학",    "region": "충남", "saraminName": null, "jobkoreaCode": null },
-    { "id": "lab021",       "name": "(주)랩오투원",           "aliases": ["랩오투원", "LAB02", "LAB021", "랩투원"],         "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "freegrow",     "name": "(주)프리그로우",         "aliases": ["프리그로우", "freegrow", "Free Grow"],           "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "cnet",         "name": "씨넷(주)",               "aliases": ["씨넷", "CNET", "C-NET"],                         "industry": "제조/화학",    "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "wartsilakorea","name": "바르질라코리아(주)",     "aliases": ["바르질라코리아", "바르질라", "Wartsila", "WÄRTSILÄ"], "industry": "서비스업", "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "deliveredkr",  "name": "(주)딜리버드코리아",     "aliases": ["딜리버드코리아", "딜리버드", "Delivered Korea"], "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "douzone_bs",   "name": "(주)더존비즈온부산지사", "aliases": ["더존비즈온부산지사", "더존비즈온", "더존"],      "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "bnksystem",    "name": "(주)비엔케이시스템",     "aliases": ["비엔케이시스템", "BNK시스템", "BNK System"],     "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "toz",          "name": "(주)토즈",               "aliases": ["토즈", "TOZ"],                                   "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "primoem",      "name": "(주)프리모엠",           "aliases": ["프리모엠", "PrimoM", "프리모"],                  "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null },
-    { "id": "iotsolution",  "name": "(주)아이오티솔루션",     "aliases": ["아이오티솔루션", "IoT솔루션", "IoT Solution"],   "industry": "IT/웹/통신",   "region": "부산", "saraminName": null, "jobkoreaCode": null }
+    {
+      "id": "iljugns",
+      "name": "일주지앤에스(주)",
+      "aliases": [
+        "일주지앤에스",
+        "일주G&S"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "bTRmYXZLME04di9BWjZoRnpqeGt3Zz09",
+          "name": "(주)일주지앤에스",
+          "address": "부산 동래구 석사로 10-1, 5층 (사직동,률영빌딩)"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "busanilbo",
+      "name": "부산일보(주)",
+      "aliases": [
+        "부산일보",
+        "부산일보사"
+      ],
+      "industry": "미디어/디자인",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "VmgyTWpOLzB5b1hqYVpWYkJDK2NiUT09",
+          "name": "부산일보(주)",
+          "address": "부산 동구 중앙대로 365"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "swinnus",
+      "name": "(주)에스위너스",
+      "aliases": [
+        "에스위너스",
+        "Swinnus",
+        "SWINNUS"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "ZGpxbTFCbjY2QU00UkhXVVdjSHVUUT09",
+          "name": "(주)에스위너스",
+          "address": "부산 해운대구 센텀중앙로 97, 제에이동 609호,610호 (재송동,센텀스카이비즈)"
+        }
+      ],
+      "jobkoreaCodes": [
+        "12679202"
+      ]
+    },
+    {
+      "id": "hssoft",
+      "name": "에이치에스소프트(주)",
+      "aliases": [
+        "에이치에스소프트",
+        "HS소프트",
+        "HSS",
+        "HSSOFT"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "인천",
+      "saramin": [
+        {
+          "csn": "QXpzRFg3Njc0VlJldm9zM05ZOGxldz09",
+          "name": "에이치에스소프트(주)",
+          "address": "인천 연수구 송도과학로 56, 1004호 (송도동,송도테크노파크비티센터)"
+        }
+      ],
+      "jobkoreaCodes": [
+        "22781957"
+      ]
+    },
+    {
+      "id": "kamco",
+      "name": "한국자산관리공사",
+      "aliases": [
+        "캠코",
+        "KAMCO",
+        "자산관리공사"
+      ],
+      "industry": "은행/금융업",
+      "region": "서울",
+      "saramin": [
+        {
+          "csn": "UVFNVXp4eHYxVlNYNFRmSlBDaVorZz09",
+          "name": "한국자산관리공사",
+          "address": "부산 남구 문현금융로 40"
+        },
+        {
+          "csn": "cGV1VGR1WVVUZUFmc1BqQVkzMmd2dz09",
+          "name": "한국자산관리공사",
+          "address": "서울 강남구 삼성동 159"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "nablesoft",
+      "name": "네이블소프트(주)",
+      "aliases": [
+        "네이블소프트",
+        "Nable",
+        "네이블"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "OGNTcksyVU5uR1BzMC9wNWlnaWpkQT09",
+          "name": "네이블소프트(주)",
+          "address": "부산 동구 중앙대로 324, 2층 (초량동,성운빌딩)"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "elecocean",
+      "name": "(주)일렉오션",
+      "aliases": [
+        "일렉오션",
+        "ElecOcean"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "NUU1SlRyM0dWY3NsQUhvY0F0SjNBQT09",
+          "name": "(주)일렉오션",
+          "address": "부산 해운대구 센텀동로 35, 308호 (우동,센텀에스에이치밸리)"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "lab021",
+      "name": "(주)랩오투원",
+      "aliases": [
+        "랩오투원",
+        "LAB02",
+        "LAB021",
+        "랩투원"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "bTRWSlhmSVV6QXc3dHROSDdLbDRKQT09",
+          "name": "(주)랩오투원",
+          "address": "부산 중구 충장대로5번길 72, 본관동 8층 (중앙동4가,케이티부산통신센터 서부산망사옥)"
+        }
+      ],
+      "jobkoreaCodes": [
+        "16629124"
+      ]
+    },
+    {
+      "id": "freegrow",
+      "name": "(주)프리그로우",
+      "aliases": [
+        "프리그로우",
+        "freegrow",
+        "Free Grow"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "emsxTi8vV0VnT2FaQ0NOY0xNNi9KZz09",
+          "name": "(주)프리그로우",
+          "address": "부산 동구 중앙대로 288, 7층 (초량동,홍인빌딩)"
+        }
+      ],
+      "jobkoreaCodes": [
+        "40001080"
+      ]
+    },
+    {
+      "id": "cnet",
+      "name": "씨넷(주)",
+      "aliases": [
+        "씨넷",
+        "CNET",
+        "C-NET"
+      ],
+      "industry": "제조/화학",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "QzFQdGhVVG1zNE9JdmpPREFra1ZFUT09",
+          "name": "(주)씨넷",
+          "address": "부산 영도구 절영로 542"
+        }
+      ],
+      "jobkoreaCodes": [
+        "302357",
+        "11670013"
+      ]
+    },
+    {
+      "id": "wartsilakorea",
+      "name": "바르질라코리아(주)",
+      "aliases": [
+        "바르질라코리아",
+        "바르질라",
+        "Wartsila",
+        "WÄRTSILÄ"
+      ],
+      "industry": "서비스업",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "SnZQc3ZOVEpuTWdCM3NvbE4xOU5lUT09",
+          "name": "바르질라코리아(주)",
+          "address": "부산 중구 충장대로9번길 46, 20층 (중앙동4가,관정빌딩)"
+        }
+      ],
+      "jobkoreaCodes": [
+        "113953"
+      ]
+    },
+    {
+      "id": "deliveredkr",
+      "name": "(주)딜리버드코리아",
+      "aliases": [
+        "딜리버드코리아",
+        "딜리버드",
+        "Delivered Korea"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "OG5GZUx3cGpCaE1vdDd5SGduTHIxdz09",
+          "name": "(주)딜리버드코리아",
+          "address": "부산 해운대구 센텀중앙로 90, 2010호 (재송동,큐비이센텀)"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "douzone_bs",
+      "name": "(주)더존비즈온부산지사",
+      "aliases": [
+        "더존비즈온부산지사",
+        "더존비즈온",
+        "더존"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "bnksystem",
+      "name": "(주)비엔케이시스템",
+      "aliases": [
+        "비엔케이시스템",
+        "BNK시스템",
+        "BNK System"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "YUI2bFZHdG5sMUJ0bnowZ28zR3NDdz09",
+          "name": "(주)비엔케이시스템",
+          "address": "부산 남구 남동천로 128, 26층"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "toz",
+      "name": "(주)토즈",
+      "aliases": [
+        "토즈",
+        "TOZ"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "MXlYaGJ5aTBobS8xTXF1dENUMnBSdz09",
+          "name": "(주)토즈",
+          "address": "부산 해운대구 센텀서로 39, 1202호 (우동,영상산업센터)"
+        }
+      ],
+      "jobkoreaCodes": [
+        "313053",
+        "27497732"
+      ]
+    },
+    {
+      "id": "primoem",
+      "name": "(주)프리모엠",
+      "aliases": [
+        "프리모엠",
+        "PrimoM",
+        "프리모"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "aWllOCtmcjRGMjlkSFA2azA3V3JRUT09",
+          "name": "(주)프리모엠",
+          "address": "부산 사상구 주례로 47, 산학협력관 5214호 (주례동,동서대학교)"
+        }
+      ],
+      "jobkoreaCodes": []
+    },
+    {
+      "id": "iotsolution",
+      "name": "(주)아이오티솔루션",
+      "aliases": [
+        "아이오티솔루션",
+        "IoT솔루션",
+        "IoT Solution"
+      ],
+      "industry": "IT/웹/통신",
+      "region": "부산",
+      "saramin": [
+        {
+          "csn": "NERESGI3UHJ5VGtGNmo4ck91ZjJ1UT09",
+          "name": "(주)아이오티솔루션",
+          "address": "부산 북구 효열로 111, 402호, 403호 (금곡동,부산지식산업센터)"
+        }
+      ],
+      "jobkoreaCodes": []
+    }
   ]
 }

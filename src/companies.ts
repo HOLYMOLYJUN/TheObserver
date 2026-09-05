@@ -24,6 +24,13 @@ export interface CompanyIndex {
   byId: Map<string, Company>;
 }
 
+/** csn → 회사 id. 확정된 법인은 이름 매칭을 건너뛰고 바로 특정할 수 있다. */
+export function buildCsnIndex(companies: Company[]): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const c of companies) for (const e of c.saramin) m.set(e.csn, c.id);
+  return m;
+}
+
 export function buildIndex(companies: Company[]): CompanyIndex {
   const exact = new Map<string, string>();
   const loose = new Map<string, string>();
@@ -31,7 +38,7 @@ export function buildIndex(companies: Company[]): CompanyIndex {
 
   for (const c of companies) {
     byId.set(c.id, c);
-    const forms = [c.name, ...c.aliases, c.saraminName ?? ""].filter(Boolean);
+    const forms = [c.name, ...c.aliases, ...c.saramin.map((e) => e.name)].filter(Boolean);
     for (const form of forms) {
       const n = normalizeCompany(form);
       if (!n) continue;

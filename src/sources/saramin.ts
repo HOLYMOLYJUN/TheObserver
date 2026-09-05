@@ -2,69 +2,173 @@ import * as cheerio from "cheerio";
 import type { Company, Posting } from "../types.ts";
 import { config } from "../config.ts";
 import { log } from "../logger.ts";
+import { normalizeCompany } from "../normalize.ts";
 import { fetchJson, fetchText } from "./fetcher.ts";
 
 const API_BASE = "https://oapi.saramin.co.kr/job-search";
-const WEB_SEARCH = "https://www.saramin.co.kr/zf_user/search/recruit";
+const ORIGIN = "https://www.saramin.co.kr";
 
-/* ── 공식 API 경로 (1순위) ─────────────────────────────────────── */
+/* ── 웹 경로 ────────────────────────────────────────────────────
+ * 기업 검색 페이지는 서버 렌더링이며, 검색된 법인마다
+ *   div.item_corp
+ *     h2.corp_name > a[href*="csn=..."]   상호 + 기업 식별자
+ *     dl > dt"기업주소" + dd               동명이인 법인 구분용
+ *     ul.list_ongoing > li                진행중 공고 목록
+ *       h2.job_tit > a[href*="rec_idx="]  공고 제목/링크
+ *       div.job_condition > span          지역 / 경력 / 학력 / 고용형태
+ *       div.job_date .date                마감일
+ * 구조를 그대로 담고 있다. 회사별 공고를 한 번의 요청으로 가져올 수 있다.
+ */
+function companySearchUrl(keyword: string): string {
+  return `${ORIGIN}/zf_user/search/company?searchType=search&searchword=${encodeURIComponent(keyword)}`;
+}
 
-/** 응답 스키마는 실제 호출로 확정 필요. 없는 필드에 대비해 전부 optional. */
-interface SaraminApiResponse {
-  jobs?: {
-    count?: number;
-    start?: number;
-    total?: number;
-    job?: SaraminApiJob[];
+function parseCondition(spans: string[]): Pick<Posting, "location" | "experience" | "employmentType"> {
+  return {
+    location: spans.find((s) => /[시도군구읍면]$|^(서울|부산|대구|인천|광주|대전|울산|세종|경기|강원|충[북남]|전[북남]|경[북남]|제주)/.test(s)),
+    experience: spans.find((s) => /경력|신입|무관/.test(s) && !/학력/.test(s)),
+    employmentType: spans.find((s) => /정규|계약|인턴|파견|프리랜서|아르바이트|위촉/.test(s)),
   };
+}
+
+/** item_corp 블록 하나에서 진행중 공고를 뽑는다 */
+function parseCorpBlock($: cheerio.CheerioAPI, el: never, companyName: string): Posting[] {
+  const $el = $(el);
+  return $el
+    .find("ul.list_ongoing > li")
+    .map((_, li): Posting | null => {
+      const $li = $(li);
+      const $a = $li.find("h2.job_tit a").first();
+      const href = $a.attr("href") ?? "";
+      const recIdx = /rec_idx=(\d+)/.exec(href)?.[1];
+      const title = ($a.attr("title") || $a.text()).trim();
+      if (!recIdx || !title) return null;
+
+      const spans = $li
+        .find(".job_condition span")
+        .map((__, s) => $(s).text().replace(/\s+/g, " ").trim())
+        .get()
+        .filter(Boolean);
+
+      return {
+        sourceId: recIdx,
+        source: "saramin" as const,
+        companyRaw: companyName,
+        title,
+        // 검색 파라미터가 잔뜩 붙은 relay URL 대신 정규 공고 URL 로 바꾼다
+        url: `${ORIGIN}/zf_user/jobs/relay/view?rec_idx=${recIdx}`,
+        ...parseCondition(spans),
+        deadline: $li.find(".job_date .date").first().text().trim() || undefined,
+      };
+    })
+    .get()
+    .filter((p): p is Posting => p !== null);
+}
+
+/**
+ * 회사 하나를 조회한다.
+ * 확정된 csn 이 있으면 그 법인 블록만 읽고, 없으면 상호가 일치하는 블록을 찾는다.
+ */
+async function collectCompany(company: Company): Promise<Posting[]> {
+  // 확정 법인이 없으면 별칭까지 동원해 검색한다 (예: "더존비즈온부산지사" → "더존비즈온")
+  const keywords = company.saramin.length > 0
+    ? [company.saramin[0]!.name]
+    : [company.name, ...company.aliases];
+
+  const wantedCsn = new Set(company.saramin.map((e) => e.csn));
+  const wantedNames = new Set(
+    [company.name, ...company.aliases, ...company.saramin.map((e) => e.name)].map(normalizeCompany),
+  );
+
+  for (const keyword of keywords) {
+    let html: string;
+    try {
+      html = await fetchText(companySearchUrl(keyword));
+    } catch (err) {
+      log.warn(`사람인 조회 실패 (${company.name} / "${keyword}"): ${(err as Error).message}`);
+      continue;
+    }
+
+    const $ = cheerio.load(html);
+    const found: Posting[] = [];
+
+    $("#company_info_list .item_corp").each((_, el) => {
+      const $a = $(el).find("h2.corp_name a").first();
+      const csn = /csn=([^&"]+)/.exec($a.attr("href") ?? "")?.[1];
+      const name = ($a.attr("title") || $a.text()).trim();
+
+      // 확정 csn 이 있으면 그것만 신뢰한다. 없을 때만 상호로 판단한다.
+      const isOurs = wantedCsn.size > 0
+        ? Boolean(csn && wantedCsn.has(csn))
+        : wantedNames.has(normalizeCompany(name));
+      if (!isOurs) return;
+
+      found.push(...parseCorpBlock($, el as never, name));
+    });
+
+    if (found.length > 0) return found;
+  }
+  return [];
+}
+
+async function collectViaWeb(companies: Company[]): Promise<Posting[]> {
+  const out: Posting[] = [];
+  const seen = new Set<string>();
+  for (const company of companies) {
+    for (const p of await collectCompany(company)) {
+      if (seen.has(p.sourceId)) continue;
+      seen.add(p.sourceId);
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+/* ── 공식 API 경로 (키가 있을 때 우선) ─────────────────────────── */
+
+interface SaraminApiResponse {
+  jobs?: { job?: SaraminApiJob[] };
 }
 
 interface SaraminApiJob {
   id?: string;
   url?: string;
-  company?: { detail?: { name?: string; href?: string } };
+  company?: { detail?: { name?: string } };
   position?: {
     title?: string;
     location?: { name?: string };
     "experience-level"?: { name?: string };
     "job-type"?: { name?: string };
-    "job-code"?: { name?: string };
   };
   "posting-date"?: string;
   "expiration-date"?: string;
-  "expiration-timestamp"?: string;
 }
 
 async function collectViaApi(companies: Company[]): Promise<Posting[]> {
   const out: Posting[] = [];
   const seen = new Set<string>();
 
-  // 회사마다 한 번씩 호출한다. 18곳 × 하루 2회 = 36회 → 일 500회 한도에 여유가 크다.
   for (const company of companies) {
-    const keyword = company.saraminName ?? company.name;
+    const keyword = company.saramin[0]?.name ?? company.name;
     const url =
       `${API_BASE}?access-key=${encodeURIComponent(config.saraminAccessKey)}` +
-      `&keywords=${encodeURIComponent(keyword)}` +
-      `&count=50&sort=pd&fields=posting-date`;
+      `&keywords=${encodeURIComponent(keyword)}&count=50&sort=pd`;
 
     let res: SaraminApiResponse;
     try {
       res = await fetchJson<SaraminApiResponse>(url);
     } catch (err) {
-      log.warn(`사람인 API 호출 실패 (${company.name}): ${(err as Error).message}`);
+      log.warn(`사람인 API 실패 (${company.name}): ${(err as Error).message}`);
       continue;
     }
 
     for (const job of res.jobs?.job ?? []) {
-      const id = job.id ?? job.url;
-      if (!id || seen.has(id)) continue;
-      seen.add(id);
-
+      const id = job.id;
       const companyRaw = job.company?.detail?.name;
       const title = job.position?.title;
-      const href = job.url ?? job.company?.detail?.href;
-      if (!companyRaw || !title || !href) continue;
-
+      const href = job.url;
+      if (!id || !companyRaw || !title || !href || seen.has(id)) continue;
+      seen.add(id);
       out.push({
         sourceId: String(id),
         source: "saramin",
@@ -82,88 +186,15 @@ async function collectViaApi(companies: Company[]): Promise<Posting[]> {
   return out;
 }
 
-/* ── 웹 파싱 경로 (API 키가 없거나 API가 죽었을 때) ─────────────── */
-
-/**
- * 셀렉터는 resolve-companies 로 받은 실제 HTML을 보고 확정해야 한다.
- * 지금은 사람인 검색 결과의 관용적인 구조를 기준으로 두고,
- * 후보를 여러 개 시도해 하나라도 걸리면 채택한다.
- */
-const SARAMIN_ITEM_SELECTORS = [
-  ".item_recruit",
-  ".content .list_item",
-  "[class*='list_item']",
-];
-
-function parseSaraminSearchHtml(html: string): Posting[] {
-  const $ = cheerio.load(html);
-  const out: Posting[] = [];
-
-  const selector = SARAMIN_ITEM_SELECTORS.find((s) => $(s).length > 0);
-  if (!selector) return out;
-
-  $(selector).each((_, el) => {
-    const $el = $(el);
-    const $title = $el.find("[class*='job_tit'] a, .area_job .job_tit a").first();
-    const title = $title.attr("title")?.trim() || $title.text().trim();
-    const href = $title.attr("href");
-    const companyRaw = $el.find("[class*='corp_name'] a, .area_corp .corp_name a").first().text().trim();
-    if (!title || !href || !companyRaw) return;
-
-    const idAttr = $el.attr("value") ?? $el.attr("id") ?? "";
-    const idFromHref = /rec_idx=(\d+)/.exec(href)?.[1];
-    const sourceId = idFromHref ?? idAttr ?? href;
-
-    const conditions = $el.find("[class*='job_condition'] span").map((__, s) => $(s).text().trim()).get();
-
-    out.push({
-      sourceId,
-      source: "saramin",
-      companyRaw,
-      title,
-      url: href.startsWith("http") ? href : `https://www.saramin.co.kr${href}`,
-      location: conditions[0],
-      experience: conditions[1],
-      employmentType: conditions[3],
-      deadline: $el.find("[class*='date']").first().text().trim() || undefined,
-    });
-  });
-
-  return out;
-}
-
-async function collectViaWeb(companies: Company[]): Promise<Posting[]> {
-  const out: Posting[] = [];
-  const seen = new Set<string>();
-
-  for (const company of companies) {
-    const keyword = company.saraminName ?? company.name;
-    const url = `${WEB_SEARCH}?searchword=${encodeURIComponent(keyword)}&recruitSort=reg_dt`;
-    try {
-      const html = await fetchText(url);
-      for (const p of parseSaraminSearchHtml(html)) {
-        if (seen.has(p.sourceId)) continue;
-        seen.add(p.sourceId);
-        out.push(p);
-      }
-    } catch (err) {
-      log.warn(`사람인 웹 검색 실패 (${company.name}): ${(err as Error).message}`);
-    }
-  }
-  return out;
-}
-
-/* ── 진입점 ────────────────────────────────────────────────────── */
-
 export async function collectSaramin(
   companies: Company[],
 ): Promise<{ postings: Posting[]; usedFallback: boolean }> {
   if (config.saraminAccessKey) {
     const postings = await collectViaApi(companies);
     if (postings.length > 0) return { postings, usedFallback: false };
-    log.warn("사람인 API가 결과를 0건 반환 — 웹 파싱으로 폴백합니다.");
+    log.warn("사람인 API 결과 0건 — 웹 파싱으로 폴백합니다.");
   }
   return { postings: await collectViaWeb(companies), usedFallback: true };
 }
 
-export const __test = { parseSaraminSearchHtml };
+export const __test = { parseCorpBlock, parseCondition };

@@ -5,7 +5,9 @@ import { isDevRole } from "./keywords.ts";
 import { collectAll } from "./sources/index.ts";
 import { Store } from "./store.ts";
 import { sendPostings, sendHeartbeat, sendBootstrapNotice, sendError } from "./slack.ts";
+import { busanFirst } from "./ordering.ts";
 import type { Posting } from "./types.ts";
+
 
 async function run(): Promise<void> {
   assertConfig();
@@ -15,7 +17,7 @@ async function run(): Promise<void> {
   const store = await Store.load();
   log.info(`감시 기업 ${companies.length}곳 · 기록된 공고 ${store.size}건`);
 
-  const unresolved = companies.filter((c) => !c.jobkoreaCode).length;
+  const unresolved = companies.filter((c) => c.jobkoreaCodes.length === 0).length;
   if (unresolved > 0) {
     log.warn(`잡코리아 회사코드 미확정 ${unresolved}곳 — 검색 기반으로 조회합니다. ` +
       `(resolve-companies 워크플로를 실행하면 정확도가 올라갑니다)`);
@@ -62,9 +64,11 @@ async function run(): Promise<void> {
     store.markBootstrapped();
     await sendBootstrapNotice(fresh.length, companies.length);
   } else if (fresh.length > 0) {
-    await sendPostings(fresh, companyName, warnings);
+    const regionOf = (id?: string) => (id ? index.byId.get(id)?.region ?? "" : "");
+    const ordered = busanFirst(fresh, regionOf);
+    await sendPostings(ordered, companyName, warnings);
     // 발송 성공 후에 기록한다 — 실패 시 다음 실행에서 재시도되도록
-    store.record(fresh.slice(0, config.maxCards));
+    store.record(ordered.slice(0, config.maxCards));
     log.info(`Slack 발송 완료: ${Math.min(fresh.length, config.maxCards)}건`);
   } else {
     const isHeartbeatDay = new Date().getUTCDay() === config.heartbeatDow;

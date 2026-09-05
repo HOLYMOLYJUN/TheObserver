@@ -3,10 +3,11 @@ import assert from "node:assert/strict";
 import { normalizeCompany, stripBranch } from "../src/normalize.ts";
 import { buildIndex, matchCompany } from "../src/companies.ts";
 import { isDevRole } from "../src/keywords.ts";
-import type { Company } from "../src/types.ts";
+import { busanFirst } from "../src/ordering.ts";
+import type { Company, Posting } from "../src/types.ts";
 
 const c = (id: string, name: string, aliases: string[] = []): Company => ({
-  id, name, aliases, industry: "", region: "", saraminName: null, jobkoreaCode: null,
+  id, name, aliases, industry: "", region: "", saramin: [], jobkoreaCodes: [],
 });
 
 test("법인격 표기를 걷어낸다", () => {
@@ -71,4 +72,28 @@ test("개발과 무관한 직무는 걸러낸다", () => {
   ]) {
     assert.equal(isDevRole(title), false, `걸러졌어야 함: ${title}`);
   }
+});
+
+
+test("부산 공고를 앞에 세우되 타지역도 유지한다", () => {
+  const p = (companyRaw: string, location?: string, companyId?: string): Posting => ({
+    sourceId: companyRaw, source: "saramin", companyRaw, title: "개발자", url: "u", location, companyId,
+  });
+
+  const out = busanFirst(
+    [p("서울회사", "서울 강남구"), p("부산회사", "부산 해운대구"), p("인천회사", "인천 연수구"), p("부산회사2", "부산 동구")],
+    () => "",
+  );
+
+  assert.deepEqual(out.map((x) => x.companyRaw), ["부산회사", "부산회사2", "서울회사", "인천회사"]);
+  assert.equal(out.length, 4, "타지역 공고가 사라지면 안 된다");
+});
+
+test("근무지 표기가 없으면 회사 소재지로 판단한다", () => {
+  const p = (id: string, companyId: string): Posting => ({
+    sourceId: id, source: "jobkorea", companyRaw: id, title: "개발자", url: "u", companyId,
+  });
+  const regions: Record<string, string> = { a: "서울", b: "부산" };
+  const out = busanFirst([p("a", "a"), p("b", "b")], (id) => regions[id!] ?? "");
+  assert.equal(out[0]!.companyRaw, "b");
 });

@@ -3,7 +3,7 @@ import type { Company, Posting } from "../types.ts";
 import { config } from "../config.ts";
 import { log } from "../logger.ts";
 import { normalizeCompany } from "../normalize.ts";
-import { fetchJson, fetchText } from "./fetcher.ts";
+import { fetchJson, fetchText, fetchRenderedHtml, describeError, LikelyBlockedError, resetBlockDetector } from "./fetcher.ts";
 
 const API_BASE = "https://oapi.saramin.co.kr/job-search";
 const ORIGIN = "https://www.saramin.co.kr";
@@ -69,6 +69,36 @@ function parseCorpBlock($: cheerio.CheerioAPI, el: never, companyName: string): 
  * 회사 하나를 조회한다.
  * 확정된 csn 이 있으면 그 법인 블록만 읽고, 없으면 상호가 일치하는 블록을 찾는다.
  */
+/**
+ * HTTP 가 막혔을 때 브라우저로 한 번 더 시도할지 여부.
+ * WAF 가 Node 의 TLS 지문을 보고 연결을 끊는 경우엔 진짜 크롬이 통과한다.
+ * 다만 IP 자체가 막힌 거라면 브라우저도 똑같이 실패하므로,
+ * 첫 시도가 실패하면 남은 회사에는 브라우저를 쓰지 않는다 (회사당 40초 낭비 방지).
+ */
+let browserFallbackViable = true;
+
+async function loadCompanyHtml(url: string, company: string): Promise<string | null> {
+  try {
+    return await fetchText(url);
+  } catch (err) {
+    if (err instanceof LikelyBlockedError) throw err;
+    log.warn(`사람인 HTTP 실패 (${company}): ${describeError(err)}`);
+  }
+
+  if (!config.allowBrowserFallback || !browserFallbackViable) return null;
+
+  try {
+    const html = await fetchRenderedHtml(url, "#company_info_list");
+    // 브라우저가 통했다면 연결 자체는 가능하다는 뜻이니 차단 카운터를 되돌린다
+    resetBlockDetector();
+    return html;
+  } catch (err) {
+    log.warn(`사람인 브라우저 폴백도 실패 (${company}): ${describeError(err)} — 이후 회사는 브라우저를 건너뜁니다`);
+    browserFallbackViable = false;
+    return null;
+  }
+}
+
 async function collectCompany(company: Company): Promise<Posting[]> {
   // 확정 법인이 없으면 별칭까지 동원해 검색한다 (예: "더존비즈온부산지사" → "더존비즈온")
   const keywords = company.saramin.length > 0
@@ -81,13 +111,8 @@ async function collectCompany(company: Company): Promise<Posting[]> {
   );
 
   for (const keyword of keywords) {
-    let html: string;
-    try {
-      html = await fetchText(companySearchUrl(keyword));
-    } catch (err) {
-      log.warn(`사람인 조회 실패 (${company.name} / "${keyword}"): ${(err as Error).message}`);
-      continue;
-    }
+    const html = await loadCompanyHtml(companySearchUrl(keyword), `${company.name} / "${keyword}"`);
+    if (html === null) continue;
 
     const $ = cheerio.load(html);
     const found: Posting[] = [];
@@ -158,7 +183,7 @@ async function collectViaApi(companies: Company[]): Promise<Posting[]> {
     try {
       res = await fetchJson<SaraminApiResponse>(url);
     } catch (err) {
-      log.warn(`사람인 API 실패 (${company.name}): ${(err as Error).message}`);
+      log.warn(`사람인 API 실패 (${company.name}): ${describeError(err)}`);
       continue;
     }
 
@@ -189,6 +214,9 @@ async function collectViaApi(companies: Company[]): Promise<Posting[]> {
 export async function collectSaramin(
   companies: Company[],
 ): Promise<{ postings: Posting[]; usedFallback: boolean }> {
+  resetBlockDetector();
+  browserFallbackViable = config.allowBrowserFallback;
+
   if (config.saraminAccessKey) {
     const postings = await collectViaApi(companies);
     if (postings.length > 0) return { postings, usedFallback: false };

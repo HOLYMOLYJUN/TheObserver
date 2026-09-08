@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-09-07T13:55:11.677Z",
+  "lastRunAt": "2026-09-08T01:40:40.854Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -82,6 +82,11 @@
       "firstSeen": "2026-09-05T11:36:27.250Z",
       "company": "에이치에스소프트(주)",
       "title": "[HS SOFT] 제조 현장의 AX 풀스택 웹 개발자 (경력 5년 이상)"
+    },
+    "saramin:54970419": {
+      "firstSeen": "2026-09-08T01:40:40.854Z",
+      "company": "(주)씨넷",
+      "title": "[부산] 연구소 개발자 채용(C++ 응용SW/Java·Spring 웹 풀스택)"
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-09-11T01:41:54.549Z",
+  "lastRunAt": "2026-09-11T12:37:20.776Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -87,6 +87,16 @@
       "firstSeen": "2026-09-08T01:40:40.854Z",
       "company": "(주)씨넷",
       "title": "[부산] 연구소 개발자 채용(C++ 응용SW/Java·Spring 웹 풀스택)"
+    },
+    "saramin:55011323": {
+      "firstSeen": "2026-09-11T12:37:20.776Z",
+      "company": "에이치에스소프트(주)",
+      "title": "AI 개발자 채용"
+    },
+    "saramin:55011411": {
+      "firstSeen": "2026-09-11T12:37:20.776Z",
+      "company": "에이치에스소프트(주)",
+      "title": "빅데이터 플랫폼 개발 프로젝트 PM (기술 리드 겸임)"
     }
   }
 }

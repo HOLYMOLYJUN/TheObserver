@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-09-16T01:57:27.210Z",
+  "lastRunAt": "2026-09-16T13:07:12.858Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -102,6 +102,21 @@
       "firstSeen": "2026-09-16T01:57:27.209Z",
       "company": "(주)씨넷",
       "title": "씨넷 Embedded SW 프로그램 개발 담당자"
+    },
+    "saramin:55054593": {
+      "firstSeen": "2026-09-16T13:07:12.858Z",
+      "company": "(주)에스위너스",
+      "title": "물류 IoT 솔루션 기술 영업 담당자 채용"
+    },
+    "saramin:55054661": {
+      "firstSeen": "2026-09-16T13:07:12.858Z",
+      "company": "(주)에스위너스",
+      "title": "IoT 기반 펌웨어(F/W) 개발자 채용"
+    },
+    "saramin:55054746": {
+      "firstSeen": "2026-09-16T13:07:12.858Z",
+      "company": "(주)에스위너스",
+      "title": "IoT 기반 펌웨어(F/W) 신입 개발자 채용"
     }
   }
 }

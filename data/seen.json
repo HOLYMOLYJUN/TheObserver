@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-09-21T01:56:30.567Z",
+  "lastRunAt": "2026-09-21T14:48:08.690Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -117,6 +117,11 @@
       "firstSeen": "2026-09-16T13:07:12.858Z",
       "company": "(주)에스위너스",
       "title": "IoT 기반 펌웨어(F/W) 신입 개발자 채용"
+    },
+    "saramin:55092683": {
+      "firstSeen": "2026-09-21T14:48:08.690Z",
+      "company": "(주)씨넷",
+      "title": "씨넷 선박 사이버보안팀 기술 수행 엔지니어 모집"
     }
   }
 }

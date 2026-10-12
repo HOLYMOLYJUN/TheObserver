@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-10-12T02:52:40.591Z",
+  "lastRunAt": "2026-10-12T17:16:34.505Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -162,6 +162,11 @@
       "firstSeen": "2026-10-08T15:13:56.009Z",
       "company": "(주)씨넷",
       "title": "씨넷  스마트쉽, 항해/통신 엔지니어 (거제도)"
+    },
+    "saramin:55260747": {
+      "firstSeen": "2026-10-12T17:16:34.504Z",
+      "company": "(주)일주지앤에스",
+      "title": "SDM실 하반기 백엔드 개발자 채용"
     }
   }
 }

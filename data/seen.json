@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-10-19T15:14:29.824Z",
+  "lastRunAt": "2026-10-20T02:20:40.080Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -187,6 +187,11 @@
       "firstSeen": "2026-10-15T13:03:27.346Z",
       "company": "(주)씨넷",
       "title": "씨넷 항해 통신 엔지니어 (부산)"
+    },
+    "saramin:55338408": {
+      "firstSeen": "2026-10-20T02:20:40.080Z",
+      "company": "(주)딜리버드코리아",
+      "title": "[딜리버드코리아] DA팀 AI 플랫폼 엔지니어 채용"
     }
   }
 }

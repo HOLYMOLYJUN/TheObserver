@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-10-28T02:46:55.399Z",
+  "lastRunAt": "2026-10-28T14:49:05.761Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -202,6 +202,11 @@
       "firstSeen": "2026-10-27T14:01:40.753Z",
       "company": "(주)에스위너스",
       "title": "프론트엔드 개발자 채용"
+    },
+    "saramin:55416241": {
+      "firstSeen": "2026-10-28T14:49:05.761Z",
+      "company": "(주)일주지앤에스",
+      "title": "SDM실 하반기 프론트엔드(퍼블리셔) 개발자 채용"
     }
   }
 }

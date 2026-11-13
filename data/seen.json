@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-11-12T16:32:56.381Z",
+  "lastRunAt": "2026-11-13T03:48:53.359Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -207,6 +207,11 @@
       "firstSeen": "2026-10-28T14:49:05.761Z",
       "company": "(주)일주지앤에스",
       "title": "SDM실 하반기 프론트엔드(퍼블리셔) 개발자 채용"
+    },
+    "saramin:55555601": {
+      "firstSeen": "2026-11-13T03:48:53.358Z",
+      "company": "에이치에스소프트(주)",
+      "title": "Python·ROS2 기반 로봇비전 개발자 경력 채용"
     }
   }
 }

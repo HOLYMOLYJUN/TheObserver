@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-11-16T17:48:14.475Z",
+  "lastRunAt": "2026-11-17T05:26:56.834Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -227,6 +227,16 @@
       "firstSeen": "2026-11-16T17:48:14.474Z",
       "company": "(주)일주지앤에스",
       "title": "(주)일주지앤에스 솔루션 영업실 채용 공고"
+    },
+    "saramin:55594269": {
+      "firstSeen": "2026-11-17T05:26:56.834Z",
+      "company": "(주)씨넷",
+      "title": "[부산] 연구소 개발자 채용(응용SW/Java·Spring 웹 풀스택)"
+    },
+    "saramin:55594295": {
+      "firstSeen": "2026-11-17T05:26:56.834Z",
+      "company": "(주)씨넷",
+      "title": "씨넷 Embedded SW 프로그램 개발 담당자"
     }
   }
 }

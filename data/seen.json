@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrapped": true,
-  "lastRunAt": "2026-11-24T19:19:30.708Z",
+  "lastRunAt": "2026-11-25T05:51:06.105Z",
   "postings": {
     "saramin:54518303": {
       "firstSeen": "2026-09-05T11:36:27.250Z",
@@ -237,6 +237,11 @@
       "firstSeen": "2026-11-17T05:26:56.834Z",
       "company": "(주)씨넷",
       "title": "씨넷 Embedded SW 프로그램 개발 담당자"
+    },
+    "saramin:55668733": {
+      "firstSeen": "2026-11-25T05:51:06.104Z",
+      "company": "네이블소프트(주)",
+      "title": "네이블소프트(주) 신입 및 경력 개발자 채용"
     }
   }
 }
